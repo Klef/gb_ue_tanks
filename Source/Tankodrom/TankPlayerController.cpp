@@ -3,20 +3,23 @@
 
 #include "TankPlayerController.h"
 #include "TankPawn.h"
+#include "DrawDebugHelpers.h"
+#include "Tankodrom.h"
 
 void ATankPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	TankPawn = Cast<ATankPawn>(GetPawn());
+	bShowMouseCursor = true;
 }
 
 void ATankPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	InputComponent->BindAxis("MoveForward", this, & ATankPlayerController::MoveForward);
-	InputComponent->BindAxis("MoveRight", this, & ATankPlayerController::MoveRight);
 	InputComponent->BindAxis("RotateRight", this, & ATankPlayerController::RotateRight);
+	InputComponent->BindAction("Fire", IE_Pressed, this, & ATankPlayerController::Fire);
 }
 
 void ATankPlayerController::MoveForward(float AxisValue)
@@ -27,18 +30,38 @@ void ATankPlayerController::MoveForward(float AxisValue)
 	}
 }
 
-void ATankPlayerController::MoveRight(float AxisValue)
-{
-	if (TankPawn)
-	{
-		TankPawn->MoveRight(AxisValue);
-	}
-}
 
 void ATankPlayerController::RotateRight(float Value)
 {
 	if (TankPawn)
 	{
 		TankPawn->RotateRight(Value);
+	}
+}
+
+void ATankPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (TankPawn)
+	{
+		FVector WorldMousePosition, WorldMouseDirection;
+		DeprojectMousePositionToWorld(WorldMousePosition, WorldMouseDirection);
+
+		FVector TurretTargetDirection = WorldMousePosition - TankPawn->GetActorLocation();
+		TurretTargetDirection.Z = 0.0f;
+		TurretTargetDirection.Normalize();
+		FVector TurretTargetPosition = TankPawn->GetActorLocation() + TurretTargetDirection * 1000.0f;
+		TankPawn->SetTurretTargetPosition(TurretTargetPosition);
+		DrawDebugLine(GetWorld(), TankPawn->GetActorLocation(), TurretTargetPosition, FColor::Green, false, 0.1f, 0, 5.f);
+
+
+	}
+}
+
+void ATankPlayerController::Fire()
+{
+	if (TankPawn)
+	{
+		TankPawn->Fire();
 	}
 }
