@@ -33,6 +33,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void Fire();
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void FireSpecial();
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void ReCharge();
 
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
