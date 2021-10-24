@@ -17,28 +17,31 @@ protected:
 	class UArrowComponent * ProjectileSpawnPoint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	float FireRate = 1.0f;
+	float FireRate = 3.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	int FireSerialAmp = 3;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin =1), Category = "Fire params")
+	int32 FireSerialAmp = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	float FireSerialRate = 2.0f; //in tick
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "FireSerialAmp > 1", EditConditionHides), Category = "Fire params")
+	float FireSerialRate = 3.0f; //for all
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireTrace;", EditConditionHides), Category = "Fire params")
 	float FireRange = 1000.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	float FireDamage = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	int Ammo = 10;
+	int32 Ammo = 10;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	float ChargeTime = 5.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	ECannonType Type = ECannonType::FireTrace;
+	ECannonType Type = ECannonType::FireProjectile;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireProjectile;", EditConditionHides), Category = "Fire params")
+	TSubclassOf<class AProjectile> ProjectileClass;
 
 private:
 	FTimerHandle ReloadTimerHandle;
@@ -46,11 +49,11 @@ private:
 	FTimerHandle ChargeTimerHandle;
 	bool bIsReadyToFire = false;
 	bool bIsReCharge = false;
-	int AmmoCurrent = Ammo;
-	int FireSerialCount = FireSerialAmp;
+	int32 AmmoCurrent = Ammo;
+	int32 FireSerialCount = FireSerialAmp;
 public:
 	ACannon();
-		void SerialShot();
+	void Shot();
 	void Fire();
 	void FireSpecial();
 	bool IsReadyToFire();

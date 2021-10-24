@@ -22,21 +22,24 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void MoveForward(float AxisValue);
+	void MoveForward(float AxisValue);
 
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void RotateRight(float Value);
+	void RotateRight(float Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void SetTurretTargetPosition(const FVector & TargetPosition);
+	void SetTurretTargetPosition(const FVector & TargetPosition);
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void Fire();
+	void Fire();
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void FireSpecial();
+	void FireSpecial();
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void ReCharge();
+	void ReCharge();
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void SetupCannon(TSubclassOf<class ACannon> InCannonClass);
 
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -68,11 +71,12 @@ protected:
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		USpringArmComponent * SpringArm;
+
 private:
 	void SetupCannon();
 
 	UPROPERTY()
-		class ACannon* Cannon = nullptr;
+	class ACannon* Cannon = nullptr;
 
 	float CurentAxisMoveForward = 0.0f;
 	float TargetAxisMoveForward = 0.0f;

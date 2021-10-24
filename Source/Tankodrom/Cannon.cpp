@@ -5,6 +5,8 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Projectile.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -30,17 +32,51 @@ void ACannon::BeginPlay()
 }
 
 
-void ACannon::SerialShot()
+void ACannon::Shot()
 {
-	if (FireSerialCount == 0)
+	float Tic = FireSerialRate / FireSerialAmp;
+	if (FireSerialAmp == 1)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(ShotTimerHandle);
-		FireSerialCount = FireSerialAmp;
+		Tic = 0.01f;
+	}
+	if (FireSerialCount > 0)
+	{
+		--FireSerialCount;
+		if (Type == ECannonType::FireProjectile)
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Projectile"));
+			AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
+			if (Projectile)
+			{
+				Projectile->Start();
+			}
+		}
+		if (Type == ECannonType::FireTrace)
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Trace"));
+			FHitResult HitResult;
+			FVector TraceStart = ProjectileSpawnPoint->GetComponentLocation();
+			FVector TraceEnd = ProjectileSpawnPoint->GetComponentLocation() + ProjectileSpawnPoint->GetForwardVector() * FireRange;
+			FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("FireTrace")), true, this);
+			TraceParams.bReturnPhysicalMaterial = false;
+			if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+			{
+				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 0.5f, 0, 5.0f);
+				if (HitResult.Actor.IsValid() && HitResult.Component.IsValid(), HitResult.Component->GetCollisionObjectType() == ECC_Destructible)
+				{
+					HitResult.Actor->Destroy();
+				}
+			}
+			else
+			{
+				DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.5f, 0, 5.0f);
+			}
+		}
+		GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::Shot, FireSerialRate / FireSerialAmp, false);
 	}
 	else
 	{
-		FireSerialCount--;
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Orange, FString::Printf(TEXT("fire # %d"), FireSerialAmp - FireSerialCount));
+		GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1.0f / FireRate, false);
 	}
 }
 
@@ -48,26 +84,14 @@ void ACannon::Fire()
 {
 	if (bIsReadyToFire)
 	{
-		if (AmmoCurrent == 0)
+		if (AmmoCurrent != 0)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("NO AMMO"));
+			AmmoCurrent--;
 			bIsReadyToFire = false;
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
+			GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::Shot, 0.01f, false);
 		}
-		if (Type == ECannonType::FireProjectile)
-		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Projectile"));
-		}
-		if (Type == ECannonType::FireTrace)
-		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Trace"));
-		}
-
-		AmmoCurrent--;
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
-		GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::SerialShot, 1.0f, false);
-		GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::SerialShot, 1.0f / FireRate, true, 1.0f / FireSerialRate);
-		bIsReadyToFire = false;
-		GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1.0f / FireRate , false, 1.0f / FireRate + FireSerialAmp * 1.0f / FireSerialRate);
+		
 	}
 	if (bIsReCharge)
 	{
@@ -82,25 +106,10 @@ void ACannon::FireSpecial()
 
 	if (bIsReadyToFire)
 	{
-		if (AmmoCurrent == 0)
+		if (AmmoCurrent != 0)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("NO AMMO"));
-			bIsReadyToFire = false;
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Orange, TEXT("BOOM"));
 		}
-		if (Type == ECannonType::FireProjectile)
-		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Projectile"));
-		}
-		if (Type == ECannonType::FireTrace)
-		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Trace"));
-		}
-		//допустим это картечь
-		AmmoCurrent--;
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Orange, TEXT("BOOM"));
-		bIsReadyToFire = false;
-		GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1.0f / FireRate, false);
 	}
 	if (bIsReCharge)
 	{
@@ -113,7 +122,7 @@ void ACannon::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	GetWorld()->GetTimerManager().ClearTimer(ReloadTimerHandle);
-	
+	GetWorld()->GetTimerManager().ClearTimer(ShotTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
 }
 
@@ -124,7 +133,9 @@ bool ACannon::IsReadyToFire()
 
 void ACannon::Reload()
 {
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Ready"));
 	bIsReadyToFire = true;
+	FireSerialCount = FireSerialAmp;
 }
 
 void ACannon::ReAmmo()

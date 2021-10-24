@@ -40,7 +40,7 @@ ATankPawn::ATankPawn()
 void ATankPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	SetupCannon();
+	SetupCannon(DefaultCannonClass);
 }
 
 // Called every frame
@@ -48,12 +48,16 @@ void ATankPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CurentAxisMoveForward = FMath::Lerp(CurentAxisMoveForward, TargetAxisMoveForward, MoventSmooth);
+	//плавность от момента времени
+	//CurentAxisMoveForward = FMath::Lerp(CurentAxisMoveForward, TargetAxisMoveForward, MoventSmooth);
+	CurentAxisMoveForward = FMath::FInterpTo(CurentAxisMoveForward, TargetAxisMoveForward, DeltaTime, MoventSmooth);
 	FVector MoveVector = GetActorForwardVector() * CurentAxisMoveForward;
 	FVector NewLocation = GetActorLocation() + MoveVector * MoveSpeed * DeltaTime;
 	
-	SetActorLocation(NewLocation);
-	CurentRotateRight = FMath::Lerp(CurentRotateRight, TargetRotateRight, RotateSmooth);
+	SetActorLocation(NewLocation, true);
+	
+	//CurentRotateRight = FMath::Lerp(CurentRotateRight, TargetRotateRight, RotateSmooth);
+	CurentRotateRight = FMath::FInterpTo(CurentRotateRight, TargetRotateRight, DeltaTime, RotateSmooth);
 	float NewYawRotation = GetActorRotation().Yaw + CurentRotateRight * RotationSpeed * DeltaTime;
 	SetActorRotation(FRotator(0, NewYawRotation, 0));
 	//example log in debug
@@ -64,7 +68,8 @@ void ATankPawn::Tick(float DeltaTime)
 	FRotator CurrentRotation = TurretMesh->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
 	TargetRotation.Pitch = CurrentRotation.Pitch;
-	TurretMesh->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TuretRotateSmooth));
+	//TurretMesh->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TuretRotateSmooth));
+	TurretMesh->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, TuretRotateSmooth));
 
 }
 
@@ -115,15 +120,18 @@ void ATankPawn::ReCharge()
 	}
 }
 
-void ATankPawn::SetupCannon()
+void ATankPawn::SetupCannon(TSubclassOf<class ACannon> InCannonClass)
 {
 	if (Cannon)
 	{
 		Cannon->Destroy();
 	}
-	FActorSpawnParameters Params;
-	Params.Instigator = this;
-	Params.Owner = this;
-	Cannon = GetWorld()->SpawnActor<ACannon>(DefaultCannonClass, Params);
-	Cannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	if (InCannonClass)
+	{
+		FActorSpawnParameters Params;
+		Params.Instigator = this;
+		Params.Owner = this;
+		Cannon = GetWorld()->SpawnActor<ACannon>(InCannonClass, Params);
+		Cannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
 }
