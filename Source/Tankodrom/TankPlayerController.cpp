@@ -22,6 +22,7 @@ void ATankPlayerController::SetupInputComponent()
 	InputComponent->BindAction("Fire", IE_Pressed, this, & ATankPlayerController::Fire);
 	InputComponent->BindAction("FireSpecial", IE_Pressed, this, &ATankPlayerController::FireSpecial);
 	InputComponent->BindAction("ReCharge", IE_Pressed, this, &ATankPlayerController::ReCharge);
+	InputComponent->BindAction("ChangeCannon", IE_Pressed, this, &ATankPlayerController::ChangeCannon);
 }
 
 void ATankPlayerController::MoveForward(float AxisValue)
@@ -81,5 +82,13 @@ void ATankPlayerController::ReCharge()
 	if (TankPawn)
 	{
 		TankPawn->ReCharge();
+	}
+}
+
+void ATankPlayerController::ChangeCannon()
+{
+	if (TankPawn)
+	{
+		TankPawn->ChangeCannon();
 	}
 }

@@ -50,16 +50,24 @@ void ATankPawn::Tick(float DeltaTime)
 
 	//плавность от момента времени
 	//CurentAxisMoveForward = FMath::Lerp(CurentAxisMoveForward, TargetAxisMoveForward, MoventSmooth);
+
 	CurentAxisMoveForward = FMath::FInterpTo(CurentAxisMoveForward, TargetAxisMoveForward, DeltaTime, MoventSmooth);
 	FVector MoveVector = GetActorForwardVector() * CurentAxisMoveForward;
 	FVector NewLocation = GetActorLocation() + MoveVector * MoveSpeed * DeltaTime;
-	
 	SetActorLocation(NewLocation, true);
+	
 	
 	//CurentRotateRight = FMath::Lerp(CurentRotateRight, TargetRotateRight, RotateSmooth);
 	CurentRotateRight = FMath::FInterpTo(CurentRotateRight, TargetRotateRight, DeltaTime, RotateSmooth);
 	float NewYawRotation = GetActorRotation().Yaw + CurentRotateRight * RotationSpeed * DeltaTime;
 	SetActorRotation(FRotator(0, NewYawRotation, 0));
+// 	
+// 	else
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, TEXT("STUCK"));
+// 	}
+	//
+	// 
 	//example log in debug
 	//UE_LOG(LogTank, Verbose, TEXT("CurentRotateRight: %f"), CurentRotateRight);
 	//UE_LOG(LogTank, Verbose, TEXT("TargetRotateRight: %f"), TargetRotateRight);
@@ -120,11 +128,37 @@ void ATankPawn::ReCharge()
 	}
 }
 
-void ATankPawn::SetupCannon(TSubclassOf<class ACannon> InCannonClass)
+
+void ATankPawn::ChangeCannon()
 {
 	if (Cannon)
 	{
-		Cannon->Destroy();
+		if (AltCannon)
+		{
+			Swap(Cannon, AltCannon);
+			Cannon->SetVisibility(true);
+			AltCannon->SetVisibility(false);
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Change Weapon"));
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("No Secondary Weapon"));
+		}
+	}
+}
+
+void ATankPawn::SetupCannon(TSubclassOf<class ACannon> InCannonClass)
+{
+	if (!AltCannon && Cannon)
+	{
+		AltCannon = Cannon;
+	}
+	else
+	{
+		if (Cannon)
+		{
+			Cannon->Destroy();
+		}
 	}
 	if (InCannonClass)
 	{
@@ -133,5 +167,13 @@ void ATankPawn::SetupCannon(TSubclassOf<class ACannon> InCannonClass)
 		Params.Owner = this;
 		Cannon = GetWorld()->SpawnActor<ACannon>(InCannonClass, Params);
 		Cannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
+
+void ATankPawn::AddAmmo(int32 CountAmmo)
+{
+	if (Cannon)
+	{
+		Cannon->AddAmmo(CountAmmo);
 	}
 }

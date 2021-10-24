@@ -20,6 +20,7 @@ class TANKODROM_API ATankPawn : public APawn
 public:
 	ATankPawn();
 	virtual void Tick(float DeltaTime) override;
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void MoveForward(float AxisValue);
@@ -39,7 +40,12 @@ public:
 	void ReCharge();
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void ChangeCannon();
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
 	void SetupCannon(TSubclassOf<class ACannon> InCannonClass);
+
+	void AddAmmo(int32 CountAmmo);
 
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -73,10 +79,11 @@ protected:
 		USpringArmComponent * SpringArm;
 
 private:
-	void SetupCannon();
 
 	UPROPERTY()
 	class ACannon* Cannon = nullptr;
+	UPROPERTY()
+	class ACannon* AltCannon = nullptr;
 
 	float CurentAxisMoveForward = 0.0f;
 	float TargetAxisMoveForward = 0.0f;

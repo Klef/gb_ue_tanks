@@ -25,5 +25,6 @@ private:
 	void RotateRight(float Value);
 	void Fire();
 	void FireSpecial();
+	void ChangeCannon();
 	void ReCharge();
 };

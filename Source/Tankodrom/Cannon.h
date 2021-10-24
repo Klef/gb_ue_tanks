@@ -59,6 +59,8 @@ public:
 	bool IsReadyToFire();
 	void ReAmmo();
 	void ReCharge();
+	void SetVisibility(bool bIsVisibility);
+	void AddAmmo(int32 CountAmmo);
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;

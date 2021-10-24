@@ -153,3 +153,13 @@ void ACannon::ReCharge()
 	bIsReCharge = true;
 	GetWorld()->GetTimerManager().SetTimer(ChargeTimerHandle, this, &ACannon::ReAmmo, ChargeTime, false);
 }
+
+void ACannon::SetVisibility(bool bIsVisibility)
+{
+	Mesh->SetHiddenInGame(!bIsVisibility);
+}
+
+void ACannon::AddAmmo(int32 CountAmmo)
+{
+	AmmoCurrent += CountAmmo;
+}
