@@ -15,12 +15,16 @@ class TANKODROM_API ATankPlayerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	UPROPERTY()
 		ATankPawn * TankPawn;
 
 	void MoveForward(float AxisValue);
-	void MoveRight(float AxisValue);
 	void RotateRight(float Value);
+	void Fire();
+	void FireSpecial();
+	void ChangeCannon();
+	void ReCharge();
 };

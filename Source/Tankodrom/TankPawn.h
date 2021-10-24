@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "TankPawn.generated.h"
 
+
 class UStaticMeshComponent;
 class UStaticMeshComponent;
 class UCameraComponent;
@@ -19,17 +20,34 @@ class TANKODROM_API ATankPawn : public APawn
 public:
 	ATankPawn();
 	virtual void Tick(float DeltaTime) override;
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void MoveForward(float AxisValue);
+	void MoveForward(float AxisValue);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void MoveRight(float AxisValue);
+	void RotateRight(float Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void RotateRight(float Value);
+	void SetTurretTargetPosition(const FVector & TargetPosition);
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void Fire();
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void FireSpecial();
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void ReCharge();
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void ChangeCannon();
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+	void SetupCannon(TSubclassOf<class ACannon> InCannonClass);
+
+	void AddAmmo(int32 CountAmmo);
+
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,19 +56,39 @@ protected:
 		UStaticMeshComponent * ArmorMesh;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent * TurretMesh;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		class UCameraComponent* Camera;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		class UArrowComponent* CannonSpawnPoint;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
-		float MoveSpeed = 250.0;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
-		float RotationSpeed = 100.0;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
+		float MoveSpeed = 100.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
+		float RotationSpeed = 100.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
+		float MoventSmooth = 0.01f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
+		float RotateSmooth = 0.01f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+		float TuretRotateSmooth = 0.01f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+		TSubclassOf<class ACannon> DefaultCannonClass;
+		
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		USpringArmComponent * SpringArm;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UCameraComponent * Camera;
 
-	float TankAxisMoveForward = 0.0;
-	float TankAxisMoveRight = 0.0;
-	float TankRotateRight = 0.0;
+private:
+
+	UPROPERTY()
+	class ACannon* Cannon = nullptr;
+	UPROPERTY()
+	class ACannon* AltCannon = nullptr;
+
+	float CurentAxisMoveForward = 0.0f;
+	float TargetAxisMoveForward = 0.0f;
+	float TargetRotateRight = 0.0f;
+	float CurentRotateRight = 0.0f;
+	FVector TurretTargetPosition;
 
 };
