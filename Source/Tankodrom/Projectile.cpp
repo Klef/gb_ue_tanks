@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "Tankodrom.h"
+#include "Damageble.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -47,9 +48,23 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
 	UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
+
+	if (OtherActor == GetInstigator())
+	{
+		Destroy();
+		return;
+	}
 	if (OtherActor && OtherComp && OtherComp->GetCollisionObjectType() == ECC_Destructible)
 	{
 		OtherActor->Destroy();
+	}
+	else if (IDamageble * Damageable = Cast<IDamageble>(OtherActor))
+	{
+		FDamageData DamageData;
+		DamageData.DamageValue = Damage;
+		DamageData.Instigator = GetInstigator();
+		DamageData.DamageMaker = this;
+		Damageable->TakeDamage(DamageData);
 	}
 	Destroy();
 }

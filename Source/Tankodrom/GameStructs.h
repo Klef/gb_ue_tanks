@@ -16,3 +16,20 @@ enum class EAmmoBoxType : uint8
     BoxAmmo = 0 UMETA(DisplayName = "Ammo Box"),
     BoxCannon = 1 UMETA(DisplayName = "Cannon Box")
 };
+
+USTRUCT(BlueprintType)
+struct FDamageData
+{
+    GENERATED_BODY()
+    
+    UPROPERTY()
+    float DamageValue;
+
+    UPROPERTY()
+    class AActor * Instigator;
+
+    UPROPERTY()
+    class AActor * DamageMaker;
+
+
+};
