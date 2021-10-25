@@ -7,6 +7,7 @@
 #include "Components/ArrowComponent.h"
 #include "Projectile.h"
 #include "DrawDebugHelpers.h"
+#include "Damageble.h"
 
 
 // Sets default values
@@ -67,10 +68,21 @@ void ACannon::Shot()
 				{
 					HitResult.Actor->Destroy();
 				}
+				else if (IDamageble* Damageable = Cast<IDamageble>(HitResult.Actor))
+				{
+					if (HitResult.Actor != GetInstigator())
+					{
+						FDamageData DamageData;
+						DamageData.DamageValue = FireDamage;
+						DamageData.Instigator = GetInstigator();
+						DamageData.DamageMaker = this;
+						Damageable->TakeDamage(DamageData);
+					}
+				}
 			}
 			else
 			{
-				DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.5f, 0, 5.0f);
+				DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 0.5f, 0, 5.0f);
 			}
 		}
 		GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::Shot, FireSerialRate / FireSerialAmp, false);

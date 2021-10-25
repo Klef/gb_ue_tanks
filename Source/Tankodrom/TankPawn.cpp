@@ -8,7 +8,9 @@
 #include "Tankodrom.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Cannon.h"
+#include "HealthComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ATankPawn::ATankPawn()
@@ -34,6 +36,13 @@ ATankPawn::ATankPawn()
 
 	CannonSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Spawn point"));
 	CannonSpawnPoint->SetupAttachment(TurretMesh);
+
+	HitCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit collider"));
+	HitCollider->SetupAttachment(ArmorMesh);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
+	HealthComponent->OnHeathChange.AddDynamic(this, &ATankPawn::OnHeathChange);
+	HealthComponent->OnDie.AddDynamic(this, &ATankPawn::OnDie);
 }
 
 // Called when the game starts or when spawned
@@ -176,4 +185,28 @@ void ATankPawn::AddAmmo(int32 CountAmmo)
 	{
 		Cannon->AddAmmo(CountAmmo);
 	}
+}
+
+void ATankPawn::Destroyed()
+{
+	Super::Destroyed();
+	if (Cannon)
+	{
+		Cannon->Destroy();
+	}
+}
+
+void ATankPawn::OnHeathChange_Implementation(float Damage)
+{
+
+}
+
+void ATankPawn::OnDie_Implementation()
+{
+	Destroy();
+}
+
+void ATankPawn::TakeDamage(const FDamageData& DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
 }

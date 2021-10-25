@@ -118,8 +118,7 @@ void ATuret::Fire()
 
 void ATuret::OnHeathChange_Implementation(float Damage)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Cyan, TEXT("On Fire"));
-	
+		
 }
 
 void ATuret::OnDie_Implementation()

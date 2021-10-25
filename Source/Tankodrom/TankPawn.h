@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Damageble.h"
 #include "TankPawn.generated.h"
 
 
@@ -13,7 +14,7 @@ class UCameraComponent;
 class USpringArmComponent;
 
 UCLASS()
-class TANKODROM_API ATankPawn : public APawn
+class TANKODROM_API ATankPawn : public APawn, public IDamageble
 {
 	GENERATED_BODY()
 
@@ -39,6 +40,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 	void ReCharge();
 
+	
+
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 	void ChangeCannon();
 
@@ -47,10 +50,18 @@ public:
 
 	void AddAmmo(int32 CountAmmo);
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+	void OnHeathChange(float Damage);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+	void OnDie();
+
+	virtual void TakeDamage(const FDamageData& DamageData) override;
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent * ArmorMesh;
@@ -60,6 +71,12 @@ protected:
 		class UCameraComponent* Camera;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		class UArrowComponent* CannonSpawnPoint;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		class UBoxComponent* HitCollider;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		class UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
 		float MoveSpeed = 100.0f;
