@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Damageble.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
 #include "TankPawn.generated.h"
 
 
@@ -76,6 +78,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
+	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+	void DestroyWait();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent * ArmorMesh;
@@ -91,6 +95,34 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* HitVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* DestroyVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SmokeVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* FireVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SparksVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* EngineVisualEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* HitSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* DestroySoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SmokeSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* FireSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SparksSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* EngineSoundEffect;
+
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
 	float MoveSpeed = 100.0f;
@@ -117,6 +149,7 @@ protected:
 	class USpringArmComponent * SpringArm;
 
 private:
+	FTimerHandle DestroyTimerHandle;
 
 	UPROPERTY()
 	class ACannon* Cannon = nullptr;
@@ -127,6 +160,10 @@ private:
 	float TargetAxisMoveForward = 0.0f;
 	float TargetRotateRight = 0.0f;
 	float CurentRotateRight = 0.0f;
+	bool BIsFiring = false;
+	bool BIsSmoking = false;
+	bool BIsSparks = false;
+	bool BIsWorking = false;
 	FVector TurretTargetPosition;
 
 };

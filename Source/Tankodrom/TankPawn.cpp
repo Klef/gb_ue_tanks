@@ -11,6 +11,7 @@
 #include "HealthComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "TimerManager.h"
 
 // Sets default values
 ATankPawn::ATankPawn()
@@ -43,6 +44,43 @@ ATankPawn::ATankPawn()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
 	HealthComponent->OnHeathChange.AddDynamic(this, &ATankPawn::OnHeathChange);
 	HealthComponent->OnDie.AddDynamic(this, &ATankPawn::OnDie);
+
+	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+	HitVisualEffect->SetupAttachment(ArmorMesh);
+
+	DestroyVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Destroy Effect"));
+	DestroyVisualEffect->SetupAttachment(ArmorMesh);
+
+	SmokeVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Smoke Effect"));
+	SmokeVisualEffect->SetupAttachment(ArmorMesh);
+
+	FireVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Fire Effect"));
+	FireVisualEffect->SetupAttachment(ArmorMesh);
+
+	SparksVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Sparks Effect"));
+	SparksVisualEffect->SetupAttachment(ArmorMesh);
+
+	EngineVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Engine Effect"));
+	EngineVisualEffect->SetupAttachment(ArmorMesh);
+
+
+	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
+	HitSoundEffect->SetupAttachment(ArmorMesh);
+
+	DestroySoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Destroy Effect"));
+	DestroySoundEffect->SetupAttachment(ArmorMesh);
+
+	SmokeSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Smoke Effect"));
+	SmokeSoundEffect->SetupAttachment(ArmorMesh);
+
+	FireSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Fire Effect"));
+	FireSoundEffect->SetupAttachment(ArmorMesh);
+
+	SparksSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Sparks Effect"));
+	SparksSoundEffect->SetupAttachment(ArmorMesh);
+
+	EngineSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Sound Effect"));
+	EngineSoundEffect->SetupAttachment(ArmorMesh);
 }
 
 // Called when the game starts or when spawned
@@ -88,6 +126,18 @@ void ATankPawn::Tick(float DeltaTime)
 	//TurretMesh->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TuretRotateSmooth));
 	TurretMesh->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, TuretRotateSmooth));
 
+	if (BIsWorking && TargetAxisMoveForward == 0)
+	{
+		BIsWorking = false;
+		EngineSoundEffect->Stop();
+		EngineVisualEffect->DeactivateSystem();
+	}
+	if (!BIsWorking && TargetAxisMoveForward == 1)
+	{
+		BIsWorking = true;
+		EngineSoundEffect->Play();
+		EngineVisualEffect->ActivateSystem();
+	}
 }
 
 
@@ -208,6 +258,13 @@ void ATankPawn::Destroyed()
 	}
 }
 
+void ATankPawn::DestroyWait()
+{
+	DestroyVisualEffect->ActivateSystem();
+	GetWorld()->SpawnActor<BP_TestAddAmmoBox>
+	Destroy();
+}
+
 FVector ATankPawn::GetTurretForwardVector()
 {
 	return TurretMesh->GetForwardVector();
@@ -215,12 +272,42 @@ FVector ATankPawn::GetTurretForwardVector()
 
 void ATankPawn::OnHeathChange_Implementation(float Damage)
 {
-
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("HIT"));
+	HitVisualEffect->ActivateSystem();
+	HitSoundEffect->Play();
+	if (!BIsFiring && HealthComponent->GetHealhtState() < 0.4f)
+	{
+		BIsFiring = true;
+		FireVisualEffect->ActivateSystem();
+		FireSoundEffect->Play();
+	}
+	if (!BIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
+	{
+		BIsSmoking = true;
+		SmokeSoundEffect->Play();
+		SmokeVisualEffect->ActivateSystem();
+	}
+	if (!BIsSparks && HealthComponent->GetHealhtState() < 0.1f)
+	{
+		BIsSparks = true;
+		SparksSoundEffect->Play();
+		SparksVisualEffect->ActivateSystem();
+	}
 }
 
 void ATankPawn::OnDie_Implementation()
 {
-	Destroy();
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Destroy"));
+	DestroyVisualEffect->ActivateSystem();
+	DestroySoundEffect->Play();
+	GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATankPawn::DestroyWait, 0.5f, false);
+	//Destroy();
+}
+
+void ATankPawn::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
 }
 
 void ATankPawn::TakeDamage(const FDamageData& DamageData)
