@@ -187,6 +187,18 @@ void ATankPawn::AddAmmo(int32 CountAmmo)
 	}
 }
 
+bool ATankPawn::NullAmmo()
+{
+	if (Cannon)
+	{
+		return Cannon->NullAmmo();
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void ATankPawn::Destroyed()
 {
 	Super::Destroyed();
@@ -194,6 +206,11 @@ void ATankPawn::Destroyed()
 	{
 		Cannon->Destroy();
 	}
+}
+
+FVector ATankPawn::GetTurretForwardVector()
+{
+	return TurretMesh->GetForwardVector();
 }
 
 void ATankPawn::OnHeathChange_Implementation(float Damage)

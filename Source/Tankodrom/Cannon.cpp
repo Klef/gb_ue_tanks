@@ -8,6 +8,9 @@
 #include "Projectile.h"
 #include "DrawDebugHelpers.h"
 #include "Damageble.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "Camera/CameraShakeBase.h"
 
 
 // Sets default values
@@ -23,6 +26,13 @@ ACannon::ACannon()
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Spawn point"));
 	ProjectileSpawnPoint->SetupAttachment(Mesh);
+
+	ShootEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Shoot Effect"));
+	ShootEffect->SetupAttachment(ProjectileSpawnPoint);
+
+	AudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Effect"));
+	AudioEffect->SetupAttachment(ProjectileSpawnPoint);
+
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +40,7 @@ void ACannon::BeginPlay()
 {
 	Super::BeginPlay();
 	bIsReadyToFire = true;
+	AmmoCurrent = Ammo;
 }
 
 
@@ -42,10 +53,19 @@ void ACannon::Shot()
 	}
 	if (FireSerialCount > 0)
 	{
+		ShootEffect->ActivateSystem();
+		AudioEffect->Play();
+		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			if (ShootShake)
+			{
+				GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
+			}
+		}
 		--FireSerialCount;
 		if (Type == ECannonType::FireProjectile)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Projectile"));
+			//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Projectile"));
 			AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
 			if (Projectile)
 			{
@@ -55,7 +75,7 @@ void ACannon::Shot()
 		}
 		if (Type == ECannonType::FireTrace)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Trace"));
+			//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire Trace"));
 			FHitResult HitResult;
 			FVector TraceStart = ProjectileSpawnPoint->GetComponentLocation();
 			FVector TraceEnd = ProjectileSpawnPoint->GetComponentLocation() + ProjectileSpawnPoint->GetForwardVector() * FireRange;
@@ -63,7 +83,7 @@ void ACannon::Shot()
 			TraceParams.bReturnPhysicalMaterial = false;
 			if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
 			{
-				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 0.5f, 0, 5.0f);
+				DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Red, false, 0.5f, 0, 10.0f);
 				if (HitResult.Actor.IsValid() && HitResult.Component.IsValid(), HitResult.Component->GetCollisionObjectType() == ECC_Destructible)
 				{
 					HitResult.Actor->Destroy();
@@ -101,15 +121,15 @@ void ACannon::Fire()
 		{
 			AmmoCurrent--;
 			bIsReadyToFire = false;
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
+			//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
 			GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::Shot, 0.01f, false);
 		}
 		
 	}
-	if (bIsReCharge)
-	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
-	}
+// 	if (bIsReCharge)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
+// 	}
 }
 
 
@@ -124,10 +144,10 @@ void ACannon::FireSpecial()
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Orange, TEXT("BOOM"));
 		}
 	}
-	if (bIsReCharge)
-	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
-	}
+// 	if (bIsReCharge)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
+// 	}
 
 }
 
@@ -146,7 +166,7 @@ bool ACannon::IsReadyToFire()
 
 void ACannon::Reload()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Ready"));
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Ready"));
 	bIsReadyToFire = true;
 	FireSerialCount = FireSerialAmp;
 }
@@ -154,17 +174,20 @@ void ACannon::Reload()
 void ACannon::ReAmmo()
 {
 	AmmoCurrent = Ammo;
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("FULL AMMO"));
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("FULL AMMO"));
 	bIsReadyToFire = true;
 	bIsReCharge = false;
 }
 
 void ACannon::ReCharge()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("RELOADING"));
-	bIsReadyToFire = false;
-	bIsReCharge = true;
-	GetWorld()->GetTimerManager().SetTimer(ChargeTimerHandle, this, &ACannon::ReAmmo, ChargeTime, false);
+	if (!bIsReCharge)
+	{
+		//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("RELOADING"));
+		bIsReadyToFire = false;
+		bIsReCharge = true;
+		GetWorld()->GetTimerManager().SetTimer(ChargeTimerHandle, this, &ACannon::ReAmmo, ChargeTime, false);
+	}
 }
 
 void ACannon::SetVisibility(bool bIsVisibility)
@@ -175,4 +198,9 @@ void ACannon::SetVisibility(bool bIsVisibility)
 void ACannon::AddAmmo(int32 CountAmmo)
 {
 	AmmoCurrent += CountAmmo;
+}
+
+bool ACannon::NullAmmo()
+{
+	return AmmoCurrent == 0;
 }

@@ -113,6 +113,10 @@ void ATuret::Fire()
 	if (Cannon)
 	{
 		Cannon->Fire();
+		if (Cannon->NullAmmo())
+		{
+			Cannon->ReCharge();
+		}
 	}
 }
 

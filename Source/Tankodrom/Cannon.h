@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Cannon.generated.h"
 
+
 UCLASS()
 class TANKODROM_API ACannon : public AActor
 {
@@ -15,6 +16,15 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UArrowComponent * ProjectileSpawnPoint;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent * ShootEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent * AudioEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	TSubclassOf<class UCameraShakeBase> ShootShake;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	float FireRate = 3.0f;
@@ -32,7 +42,7 @@ protected:
 	float FireDamage = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
-	int32 Ammo = 10;
+	int32 Ammo = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	float ChargeTime = 5.0f;
@@ -43,13 +53,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireProjectile;", EditConditionHides), Category = "Fire params")
 	TSubclassOf<class AProjectile> ProjectileClass;
 
+	
+
 private:
 	FTimerHandle ReloadTimerHandle;
 	FTimerHandle ShotTimerHandle;
 	FTimerHandle ChargeTimerHandle;
 	bool bIsReadyToFire = false;
 	bool bIsReCharge = false;
-	int32 AmmoCurrent = Ammo;
+	int32 AmmoCurrent;
 	int32 FireSerialCount = FireSerialAmp;
 public:
 	ACannon();
@@ -61,6 +73,7 @@ public:
 	void ReCharge();
 	void SetVisibility(bool bIsVisibility);
 	void AddAmmo(int32 CountAmmo);
+	bool NullAmmo();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
