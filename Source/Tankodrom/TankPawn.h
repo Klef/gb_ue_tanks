@@ -63,8 +63,14 @@ public:
 	virtual void TakeDamage(const FDamageData& DamageData) override;
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable, Category = "AI|Move params")
+	void SetPatrolPoints(TArray<class ATargetPoint*>& InPoints)
+	{
+		PatrollingPoint = InPoints;
+	}
+
 	UFUNCTION(BlueprintPure, Category = "AI|Move params")
-	const TArray<FVector>& GetPatrolPoints()
+	const TArray<class ATargetPoint*>& GetPatrolPoints() const
 	{
 		return PatrollingPoint;
 	};
@@ -98,8 +104,8 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* HitVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* DestroyVisualEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class UParticleSystem* DestroyVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* SmokeVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -111,8 +117,8 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* HitSoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* DestroySoundEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class USoundBase* DestroySoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* SmokeSoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -138,9 +144,11 @@ protected:
 	TSubclassOf<class ACannon> DefaultCannonClass;
 	
 	
+	//130631
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params", Meta = (MakeEditWidget = true))
-	TArray<FVector> PatrollingPoint;
+	TArray<class ATargetPoint *> PatrollingPoint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Move params")
 	float MovementAccuracy = 50.0f;

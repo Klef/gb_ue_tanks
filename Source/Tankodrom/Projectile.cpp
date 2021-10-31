@@ -7,6 +7,9 @@
 #include "TimerManager.h"
 #include "Tankodrom.h"
 #include "Damageble.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -22,6 +25,14 @@ AProjectile::AProjectile()
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->OnComponentHit.AddDynamic(this, &AProjectile::OnMeshHit);
 	RootComponent = Mesh;
+	FireVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Fire Effect"));
+	FireVisualEffect->SetupAttachment(RootComponent);
+
+// 	DestroyVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Destroy Effect"));
+// 	DestroyVisualEffect->SetupAttachment(RootComponent);
+// 
+// 	DestroySoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Destroy Effect"));
+// 	DestroySoundEffect->SetupAttachment(RootComponent);
 
 }
 
@@ -47,8 +58,8 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
-	UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
-
+	//UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
 	if (OtherActor == GetInstigator())
 	{
 		Destroy();

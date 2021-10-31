@@ -13,6 +13,15 @@ protected:
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
     class UStaticMeshComponent* Mesh;
 
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UParticleSystemComponent* DestroyVisualEffect;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UAudioComponent* DestroySoundEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class UParticleSystem* HitVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* FireVisualEffect;
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
     float MoveSpeed = 100.0f;
 

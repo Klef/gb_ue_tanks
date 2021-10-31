@@ -23,7 +23,6 @@ protected:
 // 	TArray<FVector> PatrollingPoints;
 
 	int32 CurrentPatrolPointIndex = 0;
-	TArray<FVector> PatrolPoint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 	float TargetingRange = 1000.0f;

@@ -14,6 +14,7 @@
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -50,8 +51,7 @@ ATuret::ATuret()
 	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
 	HitVisualEffect->SetupAttachment(TurretMesh);
 
-	DestroyVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Destroy Effect"));
-	DestroyVisualEffect->SetupAttachment(TurretMesh);
+
 
 	SmokeVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Smoke Effect"));
 	SmokeVisualEffect->SetupAttachment(TurretMesh);
@@ -66,8 +66,6 @@ ATuret::ATuret()
 	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
 	HitSoundEffect->SetupAttachment(TurretMesh);
 
-	DestroySoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Destroy Effect"));
-	DestroySoundEffect->SetupAttachment(TurretMesh);
 
 	SmokeSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Smoke Effect"));
 	SmokeSoundEffect->SetupAttachment(TurretMesh);
@@ -108,7 +106,6 @@ void ATuret::Destroyed()
 
 void ATuret::DestroyWait()
 {
-	DestroyVisualEffect->ActivateSystem();
 	Destroy();
 }
 
@@ -202,10 +199,10 @@ void ATuret::OnHeathChange_Implementation(float Damage)
 
 void ATuret::OnDie_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Destroy"));
-	DestroyVisualEffect->ActivateSystem();
-	DestroySoundEffect->Play();
-	GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATuret::DestroyWait, 0.5f, false);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DestroySoundEffect, GetActorLocation());
+	Destroy();
+	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATuret::DestroyWait, 0.5f, false);
 }
 
 void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)

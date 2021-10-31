@@ -55,13 +55,13 @@ void ACannon::Shot()
 	{
 		ShootEffect->ActivateSystem();
 		AudioEffect->Play();
-		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
-		{
-			if (ShootShake)
-			{
-				GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
-			}
-		}
+// 		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+// 		{
+// 			if (ShootShake)
+// 			{
+// 				GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
+// 			}
+// 		}
 		--FireSerialCount;
 		if (Type == ECannonType::FireProjectile)
 		{
@@ -121,15 +121,28 @@ void ACannon::Fire()
 		{
 			AmmoCurrent--;
 			bIsReadyToFire = false;
-			//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
+			if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+			{
+				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
+			}
 			GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ACannon::Shot, 0.01f, false);
+		}
+		else
+		{
+			if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+			{
+				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("NO AMMO"));
+			}
 		}
 		
 	}
-// 	if (bIsReCharge)
-// 	{
-// 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
-// 	}
+	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		if (bIsReCharge)
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
+		}
+	}
 }
 
 
@@ -144,10 +157,13 @@ void ACannon::FireSpecial()
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Orange, TEXT("BOOM"));
 		}
 	}
-// 	if (bIsReCharge)
-// 	{
-// 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
-// 	}
+	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		if (bIsReCharge)
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Waiting Charge"));
+		}
+	}
 
 }
 
@@ -174,7 +190,10 @@ void ACannon::Reload()
 void ACannon::ReAmmo()
 {
 	AmmoCurrent = Ammo;
-	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("FULL AMMO"));
+	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("FULL AMMO"));
+	}
 	bIsReadyToFire = true;
 	bIsReCharge = false;
 }
@@ -183,7 +202,10 @@ void ACannon::ReCharge()
 {
 	if (!bIsReCharge)
 	{
-		//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("RELOADING"));
+		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("RELOADING"));
+		}
 		bIsReadyToFire = false;
 		bIsReCharge = true;
 		GetWorld()->GetTimerManager().SetTimer(ChargeTimerHandle, this, &ACannon::ReAmmo, ChargeTime, false);
