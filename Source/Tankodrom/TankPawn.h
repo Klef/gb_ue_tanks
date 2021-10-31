@@ -168,10 +168,10 @@ private:
 	float TargetAxisMoveForward = 0.0f;
 	float TargetRotateRight = 0.0f;
 	float CurentRotateRight = 0.0f;
-	bool BIsFiring = false;
-	bool BIsSmoking = false;
-	bool BIsSparks = false;
-	bool BIsWorking = false;
+	bool bIsFiring = false;
+	bool bIsSmoking = false;
+	bool bIsSparks = false;
+	bool bIsWorking = false;
 	FVector TurretTargetPosition;
 
 };

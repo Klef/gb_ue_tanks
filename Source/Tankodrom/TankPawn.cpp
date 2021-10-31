@@ -127,15 +127,25 @@ void ATankPawn::Tick(float DeltaTime)
 	//TurretMesh->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TuretRotateSmooth));
 	TurretMesh->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, TuretRotateSmooth));
 
-	if (BIsWorking && TargetAxisMoveForward == 0)
+	if (Cannon->isMortable())
 	{
-		BIsWorking = false;
+		//DrawDebugLine(GetWorld(), TankPawn->GetActorLocation(), TurretTargetPosition, FColor::White, false, 0.1f, 0, 5.f);
+		//FVector::DistSquared
+		//if (FVector::DistSquared(PlayerPawn->GetActorLocation(), TankPawn->GetActorLocation()) > FMath::Square(TargetingRange))
+		float CurrentDist = FVector::DistSquared(GetActorLocation(), TurretTargetPosition);
+		TargetRotation.Yaw = CurrentRotation.Yaw;
+
+	}
+
+	if (bIsWorking && TargetAxisMoveForward == 0)
+	{
+		bIsWorking = false;
 		EngineSoundEffect->Stop();
 		EngineVisualEffect->DeactivateSystem();
 	}
-	if (!BIsWorking && TargetAxisMoveForward == 1)
+	if (!bIsWorking && TargetAxisMoveForward == 1)
 	{
-		BIsWorking = true;
+		bIsWorking = true;
 		EngineSoundEffect->Play();
 		EngineVisualEffect->ActivateSystem();
 	}
@@ -276,21 +286,21 @@ void ATankPawn::OnHeathChange_Implementation(float Damage)
 	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("HIT"));
 	//HitVisualEffect->ActivateSystem();
 	//HitSoundEffect->Play();
-	if (!BIsFiring && HealthComponent->GetHealhtState() < 0.4f)
+	if (!bIsFiring && HealthComponent->GetHealhtState() < 0.4f)
 	{
-		BIsFiring = true;
+		bIsFiring = true;
 		FireVisualEffect->ActivateSystem();
 		FireSoundEffect->Play();
 	}
-	if (!BIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
+	if (!bIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
 	{
-		BIsSmoking = true;
+		bIsSmoking = true;
 		SmokeSoundEffect->Play();
 		SmokeVisualEffect->ActivateSystem();
 	}
-	if (!BIsSparks && HealthComponent->GetHealhtState() < 0.1f)
+	if (!bIsSparks && HealthComponent->GetHealhtState() < 0.1f)
 	{
-		BIsSparks = true;
+		bIsSparks = true;
 		SparksSoundEffect->Play();
 		SparksVisualEffect->ActivateSystem();
 	}

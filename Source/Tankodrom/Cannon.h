@@ -48,6 +48,9 @@ protected:
 	float ChargeTime = 5.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
+	bool bIsMotrable = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	ECannonType Type = ECannonType::FireProjectile;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireProjectile;", EditConditionHides), Category = "Fire params")
@@ -74,6 +77,7 @@ public:
 	void SetVisibility(bool bIsVisibility);
 	void AddAmmo(int32 CountAmmo);
 	bool NullAmmo();
+	bool isMortable();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;

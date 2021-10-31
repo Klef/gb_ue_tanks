@@ -175,6 +175,7 @@ void ACannon::EndPlay(EEndPlayReason::Type EndPlayReason)
 	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
 }
 
+
 bool ACannon::IsReadyToFire()
 {
 	return bIsReadyToFire;
@@ -225,4 +226,9 @@ void ACannon::AddAmmo(int32 CountAmmo)
 bool ACannon::NullAmmo()
 {
 	return AmmoCurrent == 0;
+}
+
+bool ACannon::isMortable()
+{
+	return bIsMotrable;
 }
