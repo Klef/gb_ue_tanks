@@ -9,6 +9,11 @@
 #include "TankPawn.h"
 #include "Engine/TargetPoint.h"
 #include "MapLoader.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
 #include "TankFactory.generated.h"
 
 UCLASS()
@@ -24,11 +29,38 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent* BuildingMesh;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* DestroyBuildingMesh;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UArrowComponent* TankSpawnPoint;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UBoxComponent* HitCollider;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class UParticleSystem* DestroyVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SmokeVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SmokeDestroyVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* FireVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SparksVisualEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* ActivatedLight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class USoundBase* DestroySoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SmokeSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SmokeDestroySoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* FireSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SparksSoundEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn tanks params")
 	TSubclassOf<class ATankPawn> SpawnTankClass;
@@ -55,6 +87,11 @@ protected:
 
 	UFUNCTION()
 	void DamageTaked(float DamageValue);
+
+	bool bIsActive = true;
+	bool BIsFiring = false;
+	bool BIsSmoking = false;
+	bool BIsSparks = false;
 
 private:
 	FTimerHandle SpawnTankTimerHandle;

@@ -60,6 +60,7 @@ void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor*
 {
 	//UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSoundEffect, GetActorLocation());
 	if (OtherActor == GetInstigator())
 	{
 		Destroy();

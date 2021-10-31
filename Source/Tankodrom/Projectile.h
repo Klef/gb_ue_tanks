@@ -21,6 +21,8 @@ protected:
 	class UParticleSystem* HitVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* FireVisualEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class USoundBase* HitSoundEffect;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
     float MoveSpeed = 100.0f;

@@ -48,8 +48,8 @@ ATuret::ATuret()
 		BodyMesh->SetStaticMesh(BodyMeshTemp);
 	}
 
-	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
-	HitVisualEffect->SetupAttachment(TurretMesh);
+// 	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+// 	HitVisualEffect->SetupAttachment(TurretMesh);
 
 
 
@@ -63,8 +63,8 @@ ATuret::ATuret()
 	SparksVisualEffect->SetupAttachment(TurretMesh);
 
 
-	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
-	HitSoundEffect->SetupAttachment(TurretMesh);
+// 	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
+// 	HitSoundEffect->SetupAttachment(TurretMesh);
 
 
 	SmokeSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Smoke Effect"));
@@ -104,10 +104,6 @@ void ATuret::Destroyed()
 	}
 }
 
-void ATuret::DestroyWait()
-{
-	Destroy();
-}
 
 void ATuret::Targeting()
 {
@@ -205,11 +201,11 @@ void ATuret::OnDie_Implementation()
 	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATuret::DestroyWait, 0.5f, false);
 }
 
-void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
-}
+// void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)
+// {
+// 	Super::EndPlay(EndPlayReason);
+// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
+// }
 
 // Called every frame
 void ATuret::Tick(float DeltaTime)

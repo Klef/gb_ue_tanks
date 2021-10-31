@@ -46,11 +46,11 @@ ATankPawn::ATankPawn()
 	HealthComponent->OnHeathChange.AddDynamic(this, &ATankPawn::OnHeathChange);
 	HealthComponent->OnDie.AddDynamic(this, &ATankPawn::OnDie);
 
-	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
-	HitVisualEffect->SetupAttachment(ArmorMesh);
+// 	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+// 	HitVisualEffect->SetupAttachment(ArmorMesh);
 
-// 	DestroyVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Destroy Effect"));
-// 	DestroyVisualEffect->SetupAttachment(ArmorMesh);
+//  	DestroyVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Destroy Effect"));
+//  	DestroyVisualEffect->SetupAttachment(ArmorMesh);
 
 	SmokeVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Smoke Effect"));
 	SmokeVisualEffect->SetupAttachment(ArmorMesh);
@@ -65,8 +65,8 @@ ATankPawn::ATankPawn()
 	EngineVisualEffect->SetupAttachment(ArmorMesh);
 
 
-	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
-	HitSoundEffect->SetupAttachment(ArmorMesh);
+//	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
+//	HitSoundEffect->SetupAttachment(ArmorMesh);
 
 // 	DestroySoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Destroy Effect"));
 // 	DestroySoundEffect->SetupAttachment(ArmorMesh);
@@ -259,12 +259,12 @@ void ATankPawn::Destroyed()
 	}
 }
 
-void ATankPawn::DestroyWait()
-{
-	//DestroyVisualEffect->ActivateSystem();
-	//GetWorld()->SpawnActor<BP_TestAddAmmoBox>
-	Destroy();
-}
+// void ATankPawn::DestroyWait()
+// {
+// 	//DestroyVisualEffect->ActivateSystem();
+// 	//GetWorld()->SpawnActor<BP_TestAddAmmoBox>
+// 	Destroy();
+// }
 
 FVector ATankPawn::GetTurretForwardVector()
 {
@@ -273,9 +273,9 @@ FVector ATankPawn::GetTurretForwardVector()
 
 void ATankPawn::OnHeathChange_Implementation(float Damage)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("HIT"));
-	HitVisualEffect->ActivateSystem();
-	HitSoundEffect->Play();
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("HIT"));
+	//HitVisualEffect->ActivateSystem();
+	//HitSoundEffect->Play();
 	if (!BIsFiring && HealthComponent->GetHealhtState() < 0.4f)
 	{
 		BIsFiring = true;
@@ -308,11 +308,11 @@ void ATankPawn::OnDie_Implementation()
 	Destroy();
 }
 
-void ATankPawn::EndPlay(EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
-}
+// void ATankPawn::EndPlay(EEndPlayReason::Type EndPlayReason)
+// {
+// 	Super::EndPlay(EndPlayReason);
+// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
+// }
 
 void ATankPawn::TakeDamage(const FDamageData& DamageData)
 {

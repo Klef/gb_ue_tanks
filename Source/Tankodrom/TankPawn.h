@@ -84,8 +84,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
-	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
-	void DestroyWait();
+//	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+//	void DestroyWait();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent * ArmorMesh;
@@ -102,8 +102,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* HitVisualEffect;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UParticleSystemComponent* HitVisualEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class UParticleSystem* DestroyVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -115,8 +115,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* EngineVisualEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* HitSoundEffect;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UAudioComponent* HitSoundEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class USoundBase* DestroySoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
