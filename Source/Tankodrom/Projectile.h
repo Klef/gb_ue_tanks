@@ -33,15 +33,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
     float Damage = 1.0f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
+    float Mass = 1.0f;
+
 public:
     AProjectile();
 
-    void Start();
+    virtual void Start();
+    virtual void Stop();
     virtual void Tick(float DeltaSeconds) override;
 
 protected:
     UFUNCTION()
-    void OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector  NormalImpulse, const FHitResult& HitResult);
+    virtual void OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector  NormalImpulse, const FHitResult& HitResult);
 private:
     FVector StarPosition;
 };

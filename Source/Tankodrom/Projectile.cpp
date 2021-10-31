@@ -42,6 +42,13 @@ void AProjectile::Start()
 	StarPosition = GetActorLocation();
 }
 
+void AProjectile::Stop()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSoundEffect, GetActorLocation());
+	Destroy();
+}
+
 // Called every frame
 void AProjectile::Tick(float DeltaTime)
 {
@@ -51,20 +58,24 @@ void AProjectile::Tick(float DeltaTime)
 	SetActorLocation(NextPosition, true);
 	if (FVector::Dist(GetActorLocation(), StarPosition) > FireRange)
 	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("puh"));
-		Destroy();
+		Stop();
 	}
 }
 
 void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
 	//UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSoundEffect, GetActorLocation());
+
 	if (OtherActor == GetInstigator())
 	{
-		Destroy();
+		Stop();
 		return;
+	}
+	if (OtherComp->IsSimulatingPhysics())
+	{
+		FVector Impulse = Mass * MoveSpeed * GetActorForwardVector();
+		OtherComp->AddImpulseAtLocation(Impulse, HitResult.ImpactPoint);
+
 	}
 	if (OtherActor && OtherComp && OtherComp->GetCollisionObjectType() == ECC_Destructible)
 	{
@@ -78,6 +89,6 @@ void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor*
 		DamageData.DamageMaker = this;
 		Damageable->TakeDamage(DamageData);
 	}
-	Destroy();
+	Stop();
 }
 
