@@ -47,6 +47,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 	float MoveSpeed = 100.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	float InTargetSpeed = 3;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	float AgilitySmooth = 0.5;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
 	bool bIsRocket = false;
 
@@ -56,6 +62,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
     float Mass = 1.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
+	float EnableRange = 800;
+
 
 
 public:
@@ -64,10 +73,10 @@ public:
     void Start();
     void Stop();
 	virtual void Tick(float DeltaTime) override;
-
+	float GetMoveSpeed();
+	UPhisicMoventComponent * GetMoveClass();
 
 protected:
-	virtual void BeginPlay() override;
     UFUNCTION()
     virtual void OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector  NormalImpulse, const FHitResult& HitResult);
 
@@ -75,5 +84,8 @@ protected:
 	virtual void Explosion(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector  NormalImpulse, const FHitResult& HitResult);
 private:
     FVector StarPosition;
+	bool bIsRocketTarget = false;
+	FVector Target = FVector::ZeroVector;
+
 	
 };

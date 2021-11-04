@@ -33,7 +33,7 @@ protected:
 	int32 FireSerialAmp = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "FireSerialAmp > 1", EditConditionHides), Category = "Fire params")
-	float FireSerialRate = 3.0f; //for all
+	float FireSerialRate = 3.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireTrace;", EditConditionHides), Category = "Fire params")
 	float FireRange = 1000.0f;
@@ -43,6 +43,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	int32 Ammo = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
+	bool AmmoMagic = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
 	float ChargeTime = 5.0f;
@@ -56,7 +59,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditComdition = "Type == ECannonType::FireProjectile;", EditConditionHides), Category = "Fire params")
 	TSubclassOf<class AProjectile> ProjectileClass;
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Fire params")
+	bool bIsSmalAgile = false;
+
 
 private:
 	FTimerHandle ReloadTimerHandle;
@@ -66,6 +71,7 @@ private:
 	bool bIsReCharge = false;
 	int32 AmmoCurrent;
 	int32 FireSerialCount = FireSerialAmp;
+	float RangeToPosition;
 public:
 	ACannon();
 	void Shot();
@@ -78,6 +84,10 @@ public:
 	void AddAmmo(int32 CountAmmo);
 	bool NullAmmo();
 	bool isMortable();
+	TSubclassOf<class AProjectile> GetProjectileClass();
+	float GetZSpawn();
+	bool GetIsSmallAgile();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;

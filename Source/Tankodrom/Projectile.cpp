@@ -11,6 +11,7 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhisicMoventComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -48,6 +49,12 @@ void AProjectile::Start()
 	{
 		MovementComponent->Velocity = GetActorForwardVector() * MoveSpeed;
 		MovementComponent->SetComponentTickEnabled(true);
+	}
+	if (bIsRocket)
+	{
+		Mesh->BodyInstance.SetInstanceSimulatePhysics(true);
+		Mesh->BodyInstance.bLockZTranslation = true;
+		Mesh->SetEnableGravity(false);
 	}
 }
 
@@ -131,12 +138,60 @@ void AProjectile::Explosion(class UPrimitiveComponent* HittedComp, class AActor*
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!bIsPhisics || !bIsRocket)
+	if (!bIsPhisics && !bIsRocket)
 	{
 		FVector NextPosition = GetActorLocation() + GetActorForwardVector() * MoveSpeed * DeltaTime;
 		SetActorLocation(NextPosition, true);
 	}
+	if (bIsRocket)
+	{
+		float EngineRocketTrust = MoveSpeed;
+		if (bIsRocketTarget)
+		{
+			
+			EngineRocketTrust = MoveSpeed * InTargetSpeed;
+			FVector CurentLocation = GetActorLocation();
+			FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(CurentLocation, Target);
+			FRotator CurrentRotation = Mesh->GetComponentRotation();
+			Mesh->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, AgilitySmooth));
 
+
+		}
+		else
+		{
+			APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+			if (FVector::DistSquared(StarPosition, GetActorLocation()) > FMath::Square(EnableRange))
+			{
+				TArray<AActor*> FindTanks;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), FindTanks);
+				float Min = FMath::Square(FireRange);
+				for (AActor * Actor : FindTanks)
+				{
+					APawn* PotencialTarget = Cast<APawn>(Actor);
+					if (PotencialTarget == PlayerPawn)
+					{
+						continue;
+					}
+					if (FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation()) < Min)
+					{
+						Target = PotencialTarget->GetActorLocation();
+						
+						Min = FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation());
+					}
+				}
+				if (Target == FVector::ZeroVector)
+				{
+					Stop();
+				}
+				else
+				{
+					bIsRocketTarget = true;
+				}
+			}
+		}
+
+		Mesh->AddForce(GetActorForwardVector() * EngineRocketTrust);
+	}
 	if (bIsPhisics)
 	{
 		if (GetActorLocation().Z < -10000.0f)
@@ -153,18 +208,19 @@ void AProjectile::Tick(float DeltaTime)
 	}
 }
 
-void AProjectile::BeginPlay()
+float AProjectile::GetMoveSpeed()
 {
-	Super::BeginPlay();
-	if (bIsRocket)
-	{
-		Mesh->AddForce(FVector (0.0f, 0.0f, 1000.0f), NAME_None, true);
-	}
+	return MoveSpeed;
+}
+
+UPhisicMoventComponent * AProjectile::GetMoveClass()
+{
+	return MovementComponent;
 }
 
 void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
-	//UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
+	UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
 
 	if (bIsExplosion)
 	{
