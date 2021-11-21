@@ -45,6 +45,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 	void ReCharge();
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SmokeSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* FireSoundEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SmokeVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* FireVisualEffect;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level loading params")
 	FName DeathLevel;
 	
@@ -99,6 +109,18 @@ public:
 	{
 		return LoadLevelName;
 	}
+	bool bIsFiring = false;
+	bool bIsSmoking = false;
+	void HitEffect();
+	void SetLoaderBool(bool bIsLoad)
+	{
+		bIsInput = bIsLoad;
+	}
+	void SetDeathName(FName LevelValue)
+	{
+		DeathLevel = LevelValue;
+	}
+	void Load();
 
 protected:
 	virtual void BeginPlay() override;
@@ -132,10 +154,7 @@ protected:
 // 	class UParticleSystemComponent* HitVisualEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class UParticleSystem* DestroyVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* SmokeVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* FireVisualEffect;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* SparksVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -145,10 +164,7 @@ protected:
 // 	class UAudioComponent* HitSoundEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class USoundBase* DestroySoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* SmokeSoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* FireSoundEffect;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* SparksSoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -206,8 +222,6 @@ private:
 	float TargetAxisMoveForward = 0.0f;
 	float TargetRotateRight = 0.0f;
 	float CurentRotateRight = 0.0f;
-	bool bIsFiring = false;
-	bool bIsSmoking = false;
 	bool bIsSparks = false;
 	bool bIsWorking = false;
 	FVector TurretTargetPosition;

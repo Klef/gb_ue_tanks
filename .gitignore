@@ -1,3 +1,4 @@
+@@ -1,74 +1,6 @@
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -72,3 +73,9 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Intermediate
+Saved
+Binaries
+DerivedDataCach
+.vs
+*.sln

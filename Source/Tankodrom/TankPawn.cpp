@@ -112,21 +112,10 @@ void ATankPawn::BeginPlay()
 	Super::BeginPlay();
 	SetupCannon(DefaultCannonClass);
 	SetupAlterCanon(AlterCannonClass);
+	Load();
+// -1634,0
+// 558,0
 
-	if (!bIsInput)
-	{
-		SpringArm->SetWorldRotation(FRotator(187.0f, 0.0f, 180.0f ));
-		SpringArm->SetWorldLocation(FVector(-5000.0f, -200.0f, 0.0f));
-	}
-	//Pitch 187
-	// X-R 180
-	//X -5000
-	//Z -200
-
-// 	-389, 0 - 1453, 0
-// 		- 369, 0	0
-// 		21, 0
-// 		356, 0 °
 }
 
 // Called every frame
@@ -141,7 +130,8 @@ void ATankPawn::Tick(float DeltaTime)
 	FVector MoveVector = GetActorForwardVector() * CurentAxisMoveForward;
 	FVector NewLocation = GetActorLocation() + MoveVector * MoveSpeed * DeltaTime;
 	SetActorLocation(NewLocation, true);
-	
+	UE_LOG(LogTank, Verbose, TEXT("MoveForward: %f, %f"), CurentAxisMoveForward, TargetAxisMoveForward);
+
 	if (bIsWorking && TargetAxisMoveForward == 0)
 	{
 		bIsWorking = false;
@@ -440,6 +430,38 @@ void ATankPawn::OnHeathChange_Implementation(float Damage)
 	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("HIT"));
 	//HitVisualEffect->ActivateSystem();
 	//HitSoundEffect->Play();
+
+	HitEffect();
+}
+
+void ATankPawn::OnDie_Implementation()
+{
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Destroy"));
+	//DestroyVisualEffect->ActivateSystem();
+	//DestroySoundEffect->Play();
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DestroySoundEffect, GetActorLocation());
+	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATankPawn::DestroyWait, 0.5f, false);
+	if (this == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), DeathLevel);
+	}
+	Destroy();
+}
+
+// void ATankPawn::EndPlay(EEndPlayReason::Type EndPlayReason)
+// {
+// 	Super::EndPlay(EndPlayReason);
+// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
+// }
+
+void ATankPawn::TakeDamage(const FDamageData& DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
+}
+
+void ATankPawn::HitEffect()
+{
 	if (!bIsFiring && HealthComponent->GetHealhtState() < 0.4f)
 	{
 		bIsFiring = true;
@@ -460,28 +482,13 @@ void ATankPawn::OnHeathChange_Implementation(float Damage)
 	}
 }
 
-void ATankPawn::OnDie_Implementation()
+void ATankPawn::Load()
 {
-	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Destroy"));
-	//DestroyVisualEffect->ActivateSystem();
-	//DestroySoundEffect->Play();
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DestroySoundEffect, GetActorLocation());
-	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATankPawn::DestroyWait, 0.5f, false);
-	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("Preved"));
+	if (!bIsInput)
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), FName(DeathLevel));
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("UPS"));
+		SpringArm->SetWorldRotation(FRotator(180.0f, 0.0f, 180.0f));
+		SpringArm->SetWorldLocation(FVector(-4800.0f, -10.0f, 190.0f));
 	}
-	Destroy();
-}
-
-// void ATankPawn::EndPlay(EEndPlayReason::Type EndPlayReason)
-// {
-// 	Super::EndPlay(EndPlayReason);
-// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
-// }
-
-void ATankPawn::TakeDamage(const FDamageData& DamageData)
-{
-	HealthComponent->TakeDamage(DamageData);
 }

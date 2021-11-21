@@ -17,90 +17,95 @@ void ATankPlayerController::BeginPlay()
 	CurentLevel = GetWorld()->GetMapName();
 	//First - solo
 	//Two - boorst
-	//Three - Laser
-	//Five - Rocket
-	//Six - Mortire
-	NextLevel = "FirstBrif";
-	if (CurentLevel == TEXT("UEDPIE_0_ZeroBrif"))
+	//Three - Rocket
+	//Four - Mortire
+	CurentLevel.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, CurentLevel);
+	NextLevel = TEXT("ZeroBrif");
+	DeathLevel = TEXT("ZeroBrif");
+	bool bIsDeath = false;
+	if (CurentLevel == TEXT("ZeroBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("Zero"));
 		bIsLoadEnable = true;
 		NextLevel = TEXT("FirstLevel");
 		DeathLevel = TEXT("ZeroBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FirstBrif"))
+	if (CurentLevel == TEXT("FirstBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("1"));
 		bIsLoadEnable = true;
-		NextLevel = TEXT("TwoLevel");
-		DeathLevel = TEXT("FirstBrif");
+		bIsDeath = true;
+		NextLevel = TEXT("FirstLevel");
+		DeathLevel = TEXT("ZeroBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_TwoBrif"))
+	if (CurentLevel == TEXT("TwoBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("2"));
 		bIsLoadEnable = true;
-		NextLevel = TEXT("ThreeLevel");
+		bIsDeath = true;
+		NextLevel = TEXT("TwoLevel");
 		DeathLevel = TEXT("TwoBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_ThreeBrif"))
+	if (CurentLevel == TEXT("ThreeBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("3"));
 		bIsLoadEnable = true;
-		NextLevel = TEXT("FourLevel");
+		bIsDeath = true;
+		NextLevel = TEXT("ThreeLevel");
 		DeathLevel = TEXT("ThreeBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FourBrif"))
+	if (CurentLevel == TEXT("FourBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("4"));
 		bIsLoadEnable = true;
-		NextLevel = TEXT("FiveLevel");
+		bIsDeath = true;
+		NextLevel = TEXT("FourLevel");
 		DeathLevel = TEXT("FourBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FiveBrifl"))
+	if (CurentLevel == TEXT("LastBrif"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("L"));
 		bIsLoadEnable = true;
-		NextLevel = TEXT("SixLevel");
-		DeathLevel = TEXT("FiveBrif");
-	}
-	if (CurentLevel == TEXT("UEDPIE_0_SixBrif"))
-	{
-		bIsLoadEnable = true;
-		NextLevel = TEXT("LastBrif");
-		DeathLevel = TEXT("SixBrif");
-	}
-	if (CurentLevel == TEXT("UEDPIE_0_LastBrif"))
-	{
 		NextLevel = TEXT("LastBrif");
 		DeathLevel = TEXT("LastBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FirstLevel"))
+	if (CurentLevel == TEXT("FirstLevel"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("10"));
 		NextLevel = TEXT("FirstLevel");
 		DeathLevel = TEXT("FirstBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_TwoLevel"))
+	if (CurentLevel == TEXT("TwoLevel"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("20"));
 		NextLevel = TEXT("TwoLevel");
 		DeathLevel = TEXT("TwoBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_ThreeLevel"))
+	if (CurentLevel == TEXT("ThreeLevel"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("30"));
 		NextLevel = TEXT("ThreeLevel");
 		DeathLevel = TEXT("ThreeBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FourLevel"))
+	if (CurentLevel == TEXT("FourLevel"))
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("40"));
 		NextLevel = TEXT("FourLevel");
 		DeathLevel = TEXT("FourBrif");
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_FiveLevel"))
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("100"));
+	TankPawn->SetDeathName(DeathLevel);
+	TankPawn->SetLoaderBool(!bIsLoadEnable);
+	if (bIsDeath)
 	{
-		NextLevel = TEXT("FiveLevel");
-		DeathLevel = TEXT("FiveBrif");
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::White, TEXT("D"));
+		TankPawn->SmokeSoundEffect->Play();
+		TankPawn->SmokeVisualEffect->ActivateSystem();
+		TankPawn->FireVisualEffect->ActivateSystem();
+		TankPawn->FireSoundEffect->Play();
 	}
-	if (CurentLevel == TEXT("UEDPIE_0_SixLevel"))
-	{
-		NextLevel = TEXT("SixLevel");
-		DeathLevel = TEXT("SixBrif");
-	}
-
-	TankPawn->DeathLevel = DeathLevel;
-	TankPawn->bIsInput = !bIsLoadEnable;
+	TankPawn->Load();
 }
 
 void ATankPlayerController::SetupInputComponent()
@@ -193,7 +198,7 @@ void ATankPlayerController::Load()
 	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, NextLevel);
 	if (bIsLoadEnable)
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), FName(NextLevel));
+		UGameplayStatics::OpenLevel(GetWorld(), NextLevel);
 	}
 }
 

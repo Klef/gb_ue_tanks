@@ -84,7 +84,7 @@ void AProjectile::Explosion(class UPrimitiveComponent* HittedComp, class AActor*
 	TArray<FHitResult> AttackHit;
 
 	FQuat Rotation = FQuat::Identity;
-	GetWorld()->DebugDrawTraceTag = "Explode Trace";
+	//GetWorld()->DebugDrawTraceTag = "Explode Trace";
 	bool bSweepResult = GetWorld()->SweepMultiByChannel
 	(
 		AttackHit,
@@ -162,21 +162,29 @@ void AProjectile::Tick(float DeltaTime)
 			APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 			if (FVector::DistSquared(StarPosition, GetActorLocation()) > FMath::Square(EnableRange))
 			{
-				TArray<AActor*> FindTanks;
-				UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), FindTanks);
-				float Min = FMath::Square(FireRange);
-				for (AActor * Actor : FindTanks)
+				if (GetInstigator() != PlayerPawn)
 				{
-					APawn* PotencialTarget = Cast<APawn>(Actor);
-					if (PotencialTarget == PlayerPawn)
+					Target = PlayerPawn->GetActorLocation();
+				}
+				else
+				{
+
+					TArray<AActor*> FindTanks;
+					UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), FindTanks);
+					float Min = FMath::Square(FireRange);
+					for (AActor* Actor : FindTanks)
 					{
-						continue;
-					}
-					if (FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation()) < Min)
-					{
-						Target = PotencialTarget->GetActorLocation();
-						
-						Min = FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation());
+						APawn* PotencialTarget = Cast<APawn>(Actor);
+						if (PotencialTarget == PlayerPawn)
+						{
+							continue;
+						}
+						if (FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation()) < Min)
+						{
+							Target = PotencialTarget->GetActorLocation();
+
+							Min = FVector::DistSquared(PotencialTarget->GetActorLocation(), GetActorLocation());
+						}
 					}
 				}
 				if (Target == FVector::ZeroVector)
@@ -221,7 +229,10 @@ UPhisicMoventComponent * AProjectile::GetMoveClass()
 void AProjectile::OnMeshHit(class UPrimitiveComponent* HittedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
 	UE_LOG(LogTank, Verbose, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
-
+	if (GetInstigator() == OtherActor)
+	{
+		return;
+	}
 	if (bIsExplosion)
 	{
 		Explosion(HittedComp, OtherActor, OtherComp, NormalImpulse, HitResult);
