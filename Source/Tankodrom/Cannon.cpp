@@ -41,6 +41,10 @@ void ACannon::BeginPlay()
 	Super::BeginPlay();
 	bIsReadyToFire = true;
 	AmmoCurrent = Ammo;
+	if (FireSerialAmp == 1)
+	{
+		FireSerialRate = 0.1f;
+	}
 }
 
 
@@ -119,9 +123,12 @@ void ACannon::Fire()
 	{
 		if (AmmoCurrent != 0)
 		{
-			AmmoCurrent--;
+			if (!AmmoMagic)
+			{
+				AmmoCurrent--;
+			}
 			bIsReadyToFire = false;
-			if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+			if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn() && !AmmoMagic)
 			{
 				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, FString::Printf(TEXT("AMMO: %d"), AmmoCurrent));
 			}
@@ -232,3 +239,19 @@ bool ACannon::isMortable()
 {
 	return bIsMotrable;
 }
+
+TSubclassOf<class AProjectile> ACannon::GetProjectileClass()
+{
+	return ProjectileClass;
+}
+
+float ACannon::GetZSpawn()
+{
+	return ProjectileSpawnPoint->GetComponentLocation().Z;
+}
+
+bool ACannon::GetIsSmallAgile()
+{
+	return bIsSmalAgile;
+}
+
