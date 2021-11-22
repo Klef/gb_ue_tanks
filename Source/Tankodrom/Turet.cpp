@@ -15,6 +15,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/PointLightComponent.h"
 
 
 // Sets default values
@@ -75,6 +76,13 @@ ATuret::ATuret()
 
 	SparksSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Sparks Effect"));
 	SparksSoundEffect->SetupAttachment(TurretMesh);
+
+	LightReadyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Ready"));
+	LightReadyCannon->SetupAttachment(TurretMesh);
+	LightBusyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Busy"));
+	LightBusyCannon->SetupAttachment(TurretMesh);
+	LightNotAmmoCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Not Ammo"));
+	LightNotAmmoCannon->SetupAttachment(TurretMesh);
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
 	HealthComponent->OnHeathChange.AddDynamic(this, &ATuret::OnHeathChange);
@@ -214,6 +222,30 @@ void ATuret::Tick(float DeltaTime)
 	if (PlayerPawn)
 	{
 		Targeting();
+	}
+	if (Cannon)
+	{
+		if (Cannon->NullAmmo())
+		{
+			LightReadyCannon->SetHiddenInGame(true);
+			LightBusyCannon->SetHiddenInGame(true);
+			LightNotAmmoCannon->SetHiddenInGame(false);
+		}
+		else
+		{
+			if (Cannon->IsReadyToFire())
+			{
+				LightReadyCannon->SetHiddenInGame(false);
+				LightBusyCannon->SetHiddenInGame(true);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+			else
+			{
+				LightReadyCannon->SetHiddenInGame(true);
+				LightBusyCannon->SetHiddenInGame(false);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+		}
 	}
 }
 

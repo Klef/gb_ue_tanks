@@ -74,6 +74,12 @@ void ATankAIController::Targeting()
 	{
 		return;
 	}
+
+
+	FVector CoordinateTarget = PlayerPawn->GetActorLocation();
+	CoordinateTarget.Z = 21;
+	TankPawn->SetMousePosition(CoordinateTarget);
+
 	FHitResult HitResult;
 	FVector TraceStart = TankPawn->GetActorLocation();
 	FVector TraceEnd = PlayerPawn->GetActorLocation();

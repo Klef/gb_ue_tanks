@@ -7,6 +7,7 @@
 #include "Damageble.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "TankPawn.generated.h"
 
 
@@ -24,41 +25,62 @@ public:
 	ATankPawn();
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void MoveForward(float AxisValue);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void MoveForward(float AxisValue);
-
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void RotateRight(float Value);
+	void RotateRight(float Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void SetTurretTargetPosition(const FVector& TargetPosition);
+	void SetTurretTargetPosition(const FVector& TargetPosition);
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SetMousePosition(FVector MouseValue);
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void Fire();
+	void Fire();
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void FireSpecial();
+	void FireSpecial();
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void ReCharge();
+	void ReCharge();
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* SmokeSoundEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UAudioComponent* FireSoundEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* SmokeVisualEffect;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UParticleSystemComponent* FireVisualEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level loading params")
+	FName DeathLevel;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level loading params")
+	bool bIsInput = true;
 
 	UFUNCTION(BlueprintPure, Category = "Turret")
-		FVector GetTurretForwardVector();
+	FVector GetTurretForwardVector();
+
+// 	UFUNCTION(BlueprintCallable, Category = "Turret")
+// 	void ChangeCannon();
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void ChangeCannon();
+	void SetupCannon(TSubclassOf<class ACannon> InCannonClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
-		void SetupCannon(TSubclassOf<class ACannon> InCannonClass);
+	void SetupAlterCanon(TSubclassOf<class ACannon> InCannonClass);
 
 	void AddAmmo(int32 CountAmmo);
 	bool NullAmmo();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
-		void OnHeathChange(float Damage);
+	void OnHeathChange(float Damage);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
-		void OnDie();
+	void OnDie();
 
 	virtual void TakeDamage(const FDamageData& DamageData) override;
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -80,6 +102,25 @@ public:
 	{
 		return MovementAccuracy;
 	};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level loading params")
+	FName LoadLevelName;
+
+	FName GetLevelName()
+	{
+		return LoadLevelName;
+	}
+	bool bIsFiring = false;
+	bool bIsSmoking = false;
+	void HitEffect();
+	void SetLoaderBool(bool bIsLoad)
+	{
+		bIsInput = bIsLoad;
+	}
+	void SetDeathName(FName LevelValue)
+	{
+		DeathLevel = LevelValue;
+	}
+	void Load();
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,12 +133,19 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent * TurretMesh;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* AlterTurretMesh;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UCameraComponent* Camera;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UArrowComponent* CannonSpawnPoint;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UArrowComponent* CannonAlterSpawnPoint;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
  	class UBoxComponent* HitCollider;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UBoxComponent* HitTurretCollider;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent* HealthComponent;
@@ -106,10 +154,7 @@ protected:
 // 	class UParticleSystemComponent* HitVisualEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class UParticleSystem* DestroyVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* SmokeVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* FireVisualEffect;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* SparksVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -119,16 +164,22 @@ protected:
 // 	class UAudioComponent* HitSoundEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class USoundBase* DestroySoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* SmokeSoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* FireSoundEffect;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* SparksSoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* EngineSoundEffect;
 
-
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightReadyCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightReadyAltCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightBusyCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightBusyAltCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightNotAmmoCannon;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank")
 	float MoveSpeed = 100.0f;
@@ -142,8 +193,11 @@ protected:
 	float TuretRotateSmooth = 0.01f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 	TSubclassOf<class ACannon> DefaultCannonClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+	TSubclassOf<class ACannon> AlterCannonClass;
 	
-	
+
+
 	//130631
 
 
@@ -162,16 +216,14 @@ private:
 	UPROPERTY()
 	class ACannon* Cannon = nullptr;
 	UPROPERTY()
-	class ACannon* AltCannon = nullptr;
+	class ACannon* AlterCannon = nullptr;
 
 	float CurentAxisMoveForward = 0.0f;
 	float TargetAxisMoveForward = 0.0f;
 	float TargetRotateRight = 0.0f;
 	float CurentRotateRight = 0.0f;
-	bool BIsFiring = false;
-	bool BIsSmoking = false;
-	bool BIsSparks = false;
-	bool BIsWorking = false;
+	bool bIsSparks = false;
+	bool bIsWorking = false;
 	FVector TurretTargetPosition;
-
+	FVector WorldMousePosition;
 };
