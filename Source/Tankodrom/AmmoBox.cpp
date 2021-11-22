@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "TankPawn.h"
 
+
 AAmmoBox::AAmmoBox()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -22,7 +23,15 @@ void AAmmoBox::OnMeshOverlapBegin(class UPrimitiveComponent* OverlappedComp, AAc
 	ATankPawn* PlayerPawn = Cast<ATankPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (OtherActor == PlayerPawn)
 	{
-		PlayerPawn->SetupCannon(CannonClass);
+		if (TypeBox == EAmmoBoxType::BoxCannon)
+		{
+			PlayerPawn->SetupAlterCanon(CannonClass);
+		}
+		if (TypeBox == EAmmoBoxType::BoxAmmo)
+		{
+			PlayerPawn->AddAmmo(AmmoInBox);
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Red, TEXT("ADD AMMO"));
+		}
 		Destroy();
 	}
 }
