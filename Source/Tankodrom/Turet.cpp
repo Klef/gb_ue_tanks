@@ -15,6 +15,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/PointLightComponent.h"
 
 
 // Sets default values
@@ -48,8 +49,8 @@ ATuret::ATuret()
 		BodyMesh->SetStaticMesh(BodyMeshTemp);
 	}
 
-	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
-	HitVisualEffect->SetupAttachment(TurretMesh);
+// 	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+// 	HitVisualEffect->SetupAttachment(TurretMesh);
 
 
 
@@ -63,8 +64,8 @@ ATuret::ATuret()
 	SparksVisualEffect->SetupAttachment(TurretMesh);
 
 
-	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
-	HitSoundEffect->SetupAttachment(TurretMesh);
+// 	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
+// 	HitSoundEffect->SetupAttachment(TurretMesh);
 
 
 	SmokeSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Smoke Effect"));
@@ -75,6 +76,13 @@ ATuret::ATuret()
 
 	SparksSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Sparks Effect"));
 	SparksSoundEffect->SetupAttachment(TurretMesh);
+
+	LightReadyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Ready"));
+	LightReadyCannon->SetupAttachment(TurretMesh);
+	LightBusyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Busy"));
+	LightBusyCannon->SetupAttachment(TurretMesh);
+	LightNotAmmoCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Not Ammo"));
+	LightNotAmmoCannon->SetupAttachment(TurretMesh);
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
 	HealthComponent->OnHeathChange.AddDynamic(this, &ATuret::OnHeathChange);
@@ -104,10 +112,6 @@ void ATuret::Destroyed()
 	}
 }
 
-void ATuret::DestroyWait()
-{
-	Destroy();
-}
 
 void ATuret::Targeting()
 {
@@ -205,11 +209,11 @@ void ATuret::OnDie_Implementation()
 	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATuret::DestroyWait, 0.5f, false);
 }
 
-void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
-}
+// void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)
+// {
+// 	Super::EndPlay(EndPlayReason);
+// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
+// }
 
 // Called every frame
 void ATuret::Tick(float DeltaTime)
@@ -218,6 +222,30 @@ void ATuret::Tick(float DeltaTime)
 	if (PlayerPawn)
 	{
 		Targeting();
+	}
+	if (Cannon)
+	{
+		if (Cannon->NullAmmo())
+		{
+			LightReadyCannon->SetHiddenInGame(true);
+			LightBusyCannon->SetHiddenInGame(true);
+			LightNotAmmoCannon->SetHiddenInGame(false);
+		}
+		else
+		{
+			if (Cannon->IsReadyToFire())
+			{
+				LightReadyCannon->SetHiddenInGame(false);
+				LightBusyCannon->SetHiddenInGame(true);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+			else
+			{
+				LightReadyCannon->SetHiddenInGame(true);
+				LightBusyCannon->SetHiddenInGame(false);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+		}
 	}
 }
 

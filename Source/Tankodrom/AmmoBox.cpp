@@ -25,7 +25,7 @@ void AAmmoBox::OnMeshOverlapBegin(class UPrimitiveComponent* OverlappedComp, AAc
 	{
 		if (TypeBox == EAmmoBoxType::BoxCannon)
 		{
-			PlayerPawn->SetupCannon(CannonClass);
+			PlayerPawn->SetupAlterCanon(CannonClass);
 		}
 		if (TypeBox == EAmmoBoxType::BoxAmmo)
 		{
