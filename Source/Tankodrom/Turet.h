@@ -34,10 +34,10 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UHealthComponent * HealthComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* HitVisualEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UParticleSystemComponent* DestroyVisualEffect;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UParticleSystemComponent* HitVisualEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class UParticleSystem* DestroyVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UParticleSystemComponent* SmokeVisualEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -46,10 +46,10 @@ protected:
 	class UParticleSystemComponent* SparksVisualEffect;
 
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* HitSoundEffect;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class UAudioComponent* DestroySoundEffect;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+// 	class UAudioComponent* HitSoundEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class USoundBase* DestroySoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* SmokeSoundEffect;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -57,6 +57,12 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UAudioComponent* SparksSoundEffect;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightReadyCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightBusyCannon;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UPointLightComponent* LightNotAmmoCannon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	class TSubclassOf<class ACannon> CannonClass;
@@ -98,9 +104,9 @@ private:
 	bool BIsFiring = false;
 	bool BIsSmoking = false;
 	bool BIsSparks = false;
-	FTimerHandle DestroyTimerHandle;
-	void DestroyWait();
-	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+//	FTimerHandle DestroyTimerHandle;
+// 	void DestroyWait();
+// 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
