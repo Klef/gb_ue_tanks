@@ -11,6 +11,11 @@
 #include "Components/BoxComponent.h"
 #include "HealthComponent.h"
 #include "Tankodrom.h"
+#include "DrawDebugHelpers.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/PointLightComponent.h"
 
 
 // Sets default values
@@ -44,6 +49,41 @@ ATuret::ATuret()
 		BodyMesh->SetStaticMesh(BodyMeshTemp);
 	}
 
+// 	HitVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+// 	HitVisualEffect->SetupAttachment(TurretMesh);
+
+
+
+	SmokeVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Smoke Effect"));
+	SmokeVisualEffect->SetupAttachment(TurretMesh);
+
+	FireVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Fire Effect"));
+	FireVisualEffect->SetupAttachment(TurretMesh);
+
+	SparksVisualEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Sparks Effect"));
+	SparksVisualEffect->SetupAttachment(TurretMesh);
+
+
+// 	HitSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio HIt Effect"));
+// 	HitSoundEffect->SetupAttachment(TurretMesh);
+
+
+	SmokeSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Smoke Effect"));
+	SmokeSoundEffect->SetupAttachment(TurretMesh);
+
+	FireSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Fire Effect"));
+	FireSoundEffect->SetupAttachment(TurretMesh);
+
+	SparksSoundEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Sparks Effect"));
+	SparksSoundEffect->SetupAttachment(TurretMesh);
+
+	LightReadyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Ready"));
+	LightReadyCannon->SetupAttachment(TurretMesh);
+	LightBusyCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Busy"));
+	LightBusyCannon->SetupAttachment(TurretMesh);
+	LightNotAmmoCannon = CreateDefaultSubobject<UPointLightComponent>(TEXT("Light Cannon Not Ammo"));
+	LightNotAmmoCannon->SetupAttachment(TurretMesh);
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
 	HealthComponent->OnHeathChange.AddDynamic(this, &ATuret::OnHeathChange);
 	HealthComponent->OnDie.AddDynamic(this, &ATuret::OnDie);
@@ -72,6 +112,7 @@ void ATuret::Destroyed()
 	}
 }
 
+
 void ATuret::Targeting()
 {
  	if (IsPlayerInRange())
@@ -87,10 +128,28 @@ void ATuret::Targeting()
 
 void ATuret::RotateToPlayer()
 {
+
+	FHitResult HitResult;
+	FVector TraceStart = GetActorLocation();
+	FVector TraceEnd = PlayerPawn->GetActorLocation();
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Turet Vision Trace")), true, this);
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+	{
+		
+		if (HitResult.Actor != PlayerPawn)
+		{
+			return;
+		}
+	}
+
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerPawn->GetActorLocation());
 	FRotator CurrRotation = TurretMesh->GetComponentRotation();
 	TargetRotation.Pitch = CurrRotation.Pitch;
 	TargetRotation.Roll = CurrRotation.Roll;
+
+	
 	TurretMesh->SetWorldRotation(FMath::RInterpConstantTo(CurrRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), TargetingSpeed));
 }
 
@@ -113,19 +172,48 @@ void ATuret::Fire()
 	if (Cannon)
 	{
 		Cannon->Fire();
+		if (Cannon->NullAmmo())
+		{
+			Cannon->ReCharge();
+		}
 	}
 }
 
 void ATuret::OnHeathChange_Implementation(float Damage)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Cyan, TEXT("On Fire"));
-	
+	if (!BIsFiring && HealthComponent->GetHealhtState() < 0.4f)
+	{
+		BIsFiring = true;
+		FireVisualEffect->ActivateSystem();
+		FireSoundEffect->Play();
+	}
+	if (!BIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
+	{
+		BIsSmoking = true;
+		SmokeSoundEffect->Play();
+		SmokeVisualEffect->ActivateSystem();
+	}
+	if (!BIsSparks && HealthComponent->GetHealhtState() < 0.1f)
+	{
+		BIsSparks = true;
+		SparksSoundEffect->Play();
+		SparksVisualEffect->ActivateSystem();
+	}
 }
 
 void ATuret::OnDie_Implementation()
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyVisualEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DestroySoundEffect, GetActorLocation());
 	Destroy();
+	//GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &ATuret::DestroyWait, 0.5f, false);
 }
+
+// void ATuret::EndPlay(EEndPlayReason::Type EndPlayReason)
+// {
+// 	Super::EndPlay(EndPlayReason);
+// 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
+// }
 
 // Called every frame
 void ATuret::Tick(float DeltaTime)
@@ -134,6 +222,30 @@ void ATuret::Tick(float DeltaTime)
 	if (PlayerPawn)
 	{
 		Targeting();
+	}
+	if (Cannon)
+	{
+		if (Cannon->NullAmmo())
+		{
+			LightReadyCannon->SetHiddenInGame(true);
+			LightBusyCannon->SetHiddenInGame(true);
+			LightNotAmmoCannon->SetHiddenInGame(false);
+		}
+		else
+		{
+			if (Cannon->IsReadyToFire())
+			{
+				LightReadyCannon->SetHiddenInGame(false);
+				LightBusyCannon->SetHiddenInGame(true);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+			else
+			{
+				LightReadyCannon->SetHiddenInGame(true);
+				LightBusyCannon->SetHiddenInGame(false);
+				LightNotAmmoCannon->SetHiddenInGame(true);
+			}
+		}
 	}
 }
 
