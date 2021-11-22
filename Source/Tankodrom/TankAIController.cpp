@@ -4,26 +4,18 @@
 #include "TankAIController.h"
 #include "DrawDebugHelpers.h"
 #include "Tankodrom.h"
+#include "Engine/TargetPoint.h"
 
 void ATankAIController::BeginPlay()
 {
 	Super::BeginPlay();
-	TankPawn = Cast<ATankPawn>(GetPawn());
-	if (TankPawn)
-	{
-		UE_LOG(LogTank, Verbose, TEXT("T %f %f. "), TankPawn->GetActorLocation().X, TankPawn->GetActorLocation().Y);
-		for (const FVector& Point : TankPawn->GetPatrolPoints())
-		{
-			UE_LOG(LogTank, Verbose, TEXT("L %f %f. "), Point.X, Point.Y);
-			UE_LOG(LogTank, Verbose, TEXT("W %f %f. "), TankPawn->GetActorLocation().X + Point.X, TankPawn->GetActorLocation().Y + Point.Y);
-			PatrolPoint.Add(TankPawn->GetActorLocation() + Point);
-		}
-	}
+	
 }
 
 void ATankAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	TankPawn = Cast<ATankPawn>(GetPawn());
 	if (TankPawn)
 	{
 		MoveToNextPoint();
@@ -33,6 +25,7 @@ void ATankAIController::Tick(float DeltaTime)
 
 void ATankAIController::MoveToNextPoint()
 {
+	const TArray<class ATargetPoint *>& PatrolPoint = TankPawn->GetPatrolPoints();
 	if (PatrolPoint.Num() == 0)
 	{
 		return;
@@ -40,7 +33,7 @@ void ATankAIController::MoveToNextPoint()
 	TankPawn->MoveForward(1.f);
 	
 	FVector PawnLocation = TankPawn->GetActorLocation();
-	FVector CurrentPoint = PatrolPoint[CurrentPatrolPointIndex];
+	FVector CurrentPoint = PatrolPoint[CurrentPatrolPointIndex]->GetActorLocation();
 	if (FVector::DistSquared(PawnLocation, CurrentPoint) <= FMath::Square(TankPawn->GetMovementAccuracy()))
 	{
 		CurrentPatrolPointIndex++;
@@ -81,6 +74,12 @@ void ATankAIController::Targeting()
 	{
 		return;
 	}
+
+
+	FVector CoordinateTarget = PlayerPawn->GetActorLocation();
+	CoordinateTarget.Z = 21;
+	TankPawn->SetMousePosition(CoordinateTarget);
+
 	FHitResult HitResult;
 	FVector TraceStart = TankPawn->GetActorLocation();
 	FVector TraceEnd = PlayerPawn->GetActorLocation();
