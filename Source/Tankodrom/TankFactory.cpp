@@ -127,15 +127,15 @@ void ATankFactory::DamageTaked(float DamageValue)
 		FireVisualEffect->ActivateSystem();
 		FireSoundEffect->Play();
 	}
-	if (!BIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
+	if (!bIsSmoking && HealthComponent->GetHealhtState() < 0.8f)
 	{
-		BIsSmoking = true;
+		bIsSmoking = true;
 		SmokeSoundEffect->Play();
 		SmokeVisualEffect->ActivateSystem();
 	}
-	if (!BIsSparks && HealthComponent->GetHealhtState() < 0.1f)
+	if (!bIsSparks && HealthComponent->GetHealhtState() < 0.1f)
 	{
-		BIsSparks = true;
+		bIsSparks = true;
 		SparksSoundEffect->Play();
 		SparksVisualEffect->ActivateSystem();
 	}

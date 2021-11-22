@@ -90,8 +90,8 @@ protected:
 
 	bool bIsActive = true;
 	bool BIsFiring = false;
-	bool BIsSmoking = false;
-	bool BIsSparks = false;
+	bool bIsSmoking = false;
+	bool bIsSparks = false;
 
 private:
 	FTimerHandle SpawnTankTimerHandle;
