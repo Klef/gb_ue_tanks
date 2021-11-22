@@ -1,5 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
+//мортра взрыв
+//оружие перезарядка
+//второй ствол
+//патроны на броне
+//красивости 
+
+//maps
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,5 +33,13 @@ private:
 	void RotateRight(float Value);
 	void Fire();
 	void FireSpecial();
+	//void ChangeCannon();
 	void ReCharge();
+	void Load();
+
+	FName NextLevel;
+	FName DeathLevel;
+	FString CurentLevel;
+	bool bIsInput = true;
+	bool bIsLoadEnable = false;
 };
